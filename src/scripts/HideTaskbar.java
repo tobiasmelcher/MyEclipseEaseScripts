@@ -16,7 +16,11 @@ public class HideTaskbar {
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				Control taskbar = findTaskbar(shell.getChildren());
-				taskbar.setVisible(false);
+				if (taskbar.isVisible()) {
+					taskbar.setVisible(false);
+				} else {
+					taskbar.setVisible(true);
+				}
 				shell.layout();
 			}
 		});
