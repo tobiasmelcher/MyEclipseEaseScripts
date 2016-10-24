@@ -92,22 +92,25 @@ public class ImportProject {
 				IEclipsePreferences node = InstanceScope.INSTANCE.getNode("org.eclipse.ease.ui");
 				diag.setFilterPath(node.get("importProjectLastDir", "c:/"));
 				String theDir = diag.open();
-				if (theDir==null || theDir.length()==0) {
+				if (theDir == null || theDir.length() == 0) {
 					return;
 				}
 				node.put("importProjectLastDir", theDir);
 				Thread t = new Thread(new FindProjectsRunnable(theDir));
 				t.start();
 				dialog = new ElementListSelectionDialog(Display.getDefault().getActiveShell(), new LabelProvider());
+				dialog.setMultipleSelection(true);
 				dialog.setTitle("Select project to import");
 				dialog.setMessage("Select a project (* = any string, ? = any char):");
 				projects.clear();
 				projects.add("a");
 				dialog.setElements(projects.toArray());
 				dialog.open();
-				Object res = dialog.getFirstResult();
+				Object[] res = dialog.getResult();
 				if (res != null) {
-					importProject(res);
+					for (Object r : res) {
+						importProject(r);
+					}
 				}
 			}
 		});
