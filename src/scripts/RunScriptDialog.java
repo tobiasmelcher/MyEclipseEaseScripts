@@ -72,6 +72,7 @@ public class RunScriptDialog {
 			}
 		}, "run_script_handler", "ALT+X");
 		new OpenUrlInChrome().addKeyHandler(); // register ALT-Y key 
+		new PasteFromClipboardHistory().addKeyHandlerAndRegisterCopyListener(); // register CTRL-SHIFT-V
 	}
 
 	private static void runScript(Object res) {

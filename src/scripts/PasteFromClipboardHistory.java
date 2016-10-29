@@ -7,6 +7,8 @@ import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IExecutionListener;
+import org.eclipse.core.commands.IHandler;
+import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.custom.StyledText;
@@ -22,34 +24,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-public class PasteFromClipboardHistory {
-
-	public static void main(String[] args) {
-		MyUtils.cleanup();
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				final ElementListSelectionDialog dialog = new ElementListSelectionDialog(Display.getDefault()
-						.getActiveShell(), new LabelProvider());
-				dialog.setAllowDuplicates(true);
-				dialog.setTitle("Paste");
-				dialog.setMessage("Paste from clipboard history");
-				@SuppressWarnings("unchecked")
-				final List<String> history = (List<String>) Display.getDefault().getData("my_history");
-				Object[] els = new Object[history.size()];
-				for (int i=0;i<els.length;i++) {
-					els[i]=(100+els.length-i)+":"+history.get(i);
-				}
-				dialog.setElements(els);
-				dialog.open();
-				Object res = dialog.getFirstResult();
-				if (res != null) {
-					insert(res);
-				}
-			}
-		});
-	}
+public class PasteFromClipboardHistory implements IHandler{
 
 	private static void insert(Object res) {
 		IEditorPart ed = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
@@ -120,5 +95,61 @@ public class PasteFromClipboardHistory {
 				});
 			}
 		});
+	}
+
+	public void addKeyHandlerAndRegisterCopyListener() {
+		PasteFromClipboardHistory.registerCopyListener(); // for clipboard history
+		MyUtils.addKeyHandler(this, "pasteFromClipbardHistory", "CTRL+SHIFT+V");
+	}
+
+	@Override
+	public void addHandlerListener(IHandlerListener handlerListener) {
+	}
+
+	@Override
+	public void dispose() {
+	}
+
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		MyUtils.cleanup();
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				final ElementListSelectionDialog dialog = new ElementListSelectionDialog(Display.getDefault()
+						.getActiveShell(), new LabelProvider());
+				dialog.setAllowDuplicates(true);
+				dialog.setTitle("Paste");
+				dialog.setMessage("Paste from clipboard history");
+				@SuppressWarnings("unchecked")
+				final List<String> history = (List<String>) Display.getDefault().getData("my_history");
+				Object[] els = new Object[history.size()];
+				for (int i=0;i<els.length;i++) {
+					els[i]=(100+els.length-i)+":"+history.get(i);
+				}
+				dialog.setElements(els);
+				dialog.open();
+				Object res = dialog.getFirstResult();
+				if (res != null) {
+					insert(res);
+				}
+			}
+		});
+		return null;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
+	@Override
+	public boolean isHandled() {
+		return true;
+	}
+
+	@Override
+	public void removeHandlerListener(IHandlerListener handlerListener) {
 	}
 }
